@@ -1,0 +1,12 @@
+<launch>
+    <node pkg="sentry_kinematics_bridge" type="twist_to_yhs_ctrl.py" 
+          name="twist_to_yhs_ctrl_bridge" output="screen">
+
+        <remap from="~twist_cmd_topic" to="/cmd_vel" />
+
+        <remap from="~ctrl_cmd_topic" to="/ctrl_cmd" />
+
+        <param name="wheelbase" type="double" value="0.6" /> 
+
+    </node>
+</launch>

@@ -1,0 +1,28 @@
+<launch>
+  <node pkg="sentry_traversability"
+        type="pcd_traversability"
+        name="pcd_traversability"
+        output="screen">
+
+    <!-- PCD 路径：用你 fast_lio 的 PCD 目录 -->
+    <param name="file_directory" value="$(find fast_lio)/PCD" />
+    <param name="file_name"      value="scans" />
+
+    <!-- 栅格分辨率 -->
+    <param name="map_resolution" value="0.05" />
+
+    <!-- 高度过滤，按你平台高度调整 -->
+    <param name="z_min" value="-1.0" />
+    <param name="z_max" value="1.0" />
+
+    <!-- 最大爬坡角（度） -->
+    <param name="max_slope_deg" value="20.0" />
+
+    <!-- 输出 topic -->
+    <param name="map_topic_name" value="traversability_map" />
+
+    <!-- 地图坐标系 -->
+    <param name="frame_id" value="map" />
+  </node>
+</launch>
+

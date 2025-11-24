@@ -1,0 +1,52 @@
+<launch>
+  <!-- Launch file for Livox MID360 LiDAR + URDF 机器人模型 -->
+
+  <!-- 是否打开 rviz -->
+  <arg name="rviz" default="true" />
+  <arg name="use_sim_time" default="true"/>
+  <arg name="map" default="$(find fast_lio)/PCD/scans.pcd" />
+
+  <!-- 1. FAST_LIO 建图部分（保持和原来 sentry_build_map.launch 一样） -->
+  <rosparam command="load" file="$(find fast_lio)/config/mid360.yaml" />
+  <param name="feature_extract_enable" type="bool" value="0"/>
+  <param name="point_filter_num" type="int" value="3"/>
+  <param name="max_iteration" type="int" value="3" />
+  <param name="filter_size_surf" type="double" value="0.5" />
+  <param name="filter_size_map" type="double" value="0.5" />
+  <param name="cube_side_length" type="double" value="1000" />
+  <param name="runtime_pos_log_enable" type="bool" value="0" />
+  <node pkg="fast_lio" type="fastlio_mapping" name="laserMapping" output="screen" />
+
+  <!-- 2. URDF 模型：和 mk_description/launch/display.launch 用的是同一个 urdf -->
+  <param name="robot_description"
+         textfile="$(find mk_description)/urdf/Mk-description.urdf" />
+
+  <!-- 发布 URDF 里的 TF（base_footprint, base_link, radar_Link 等） -->
+  <node name="robot_state_publisher"
+        pkg="robot_state_publisher"
+        type="robot_state_publisher"
+        output="screen" />
+
+  <!-- 3. 把 FAST_LIO 的 body 坐标系 和 机器人 base_footprint 连起来 -->
+  <!-- 假设：雷达所在的 body 坐标系，就在 URDF 里的 radar_Link 附近
+       URDF 里 base_footprint -> base_link 是 z = 0.25
+             base_link -> radar_Link 是 z = 0.582
+       所以雷达比 base_footprint 高 0.25 + 0.582 = 0.832 米
+       我们这里就认为 body 在雷达处，所以：
+       body 到 base_footprint 的平移是 (0, 0, -0.832)，姿态先设为 0 0 0 -->
+<node pkg="tf2_ros" type="static_transform_publisher" name="body_to_base_footprint"
+      args="0.046 0 -0.823 0 -0.5236 0 body base_footprint" />
+
+
+
+  <!-- 4. RViz 配置 -->
+  <group if="$(arg rviz)">
+    <node launch-prefix="nice"
+          pkg="rviz"
+          type="rviz"
+          name="rviz"
+          args="-d $(find fast_lio_localization)/rviz_cfg/sentry_build_map_urdf.rviz" />
+  </group>
+
+</launch>
+
